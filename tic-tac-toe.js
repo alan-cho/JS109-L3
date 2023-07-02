@@ -1,3 +1,9 @@
+const readline = require("readline-sync");
+let isPlayersTurn;
+let playersPiece;
+let computersPiece;
+let boardValues = [];
+
 function displayBoard(boardValues) {
   console.log("");
   console.log("     |     |     ");
@@ -21,7 +27,7 @@ function displayBoard(boardValues) {
 }
 
 function initializeBoard() {
-  let boardValues = [];
+  boardValues = [];
   for (let i = 0; i <= 8; i += 1) {
     boardValues[i] = " ";
   }
@@ -31,8 +37,9 @@ function initializeBoard() {
 
 function getPlayersPiece() {
   while (true) {
-    prompt("Choose your piece: X or O");
-    playersPiece = readline.question().toUpperCase();
+    playersPiece = readline
+      .question("Choose your piece, X or O: ")
+      .toUpperCase();
     if (playersPiece === "X") {
       computersPiece = "O"; //What does it mean it doesn't get read?
       break;
@@ -48,10 +55,11 @@ function getPlayersPiece() {
 
 function playersTurn(piece) {
   while (true) {
-    prompt("Select the square you'd like to play: 1-9");
-    let square = readline.question.trim();
-    if (boardValues[square] === " ") {
-      makeMove(square, piece, boardValues);
+    let square = readline
+      .question("Select the square you'd like to play, 1-9: ")
+      .trim();
+    if (boardValues[`${Number(square) - 1}`] === " ") {
+      makeMove(`${Number(square) - 1}`, piece, boardValues);
       break;
     }
     console.log("Please enter a valid square.");
@@ -121,7 +129,7 @@ function winConditions(piece, boardValues) {
 
 function gameLoop(playersPiece) {
   initializeBoard();
-  displayBoard();
+  displayBoard(boardValues);
 
   if (playersPiece === "O") {
     isPlayersTurn = true;
@@ -139,16 +147,12 @@ function gameLoop(playersPiece) {
     }
 
     if (isPlayersTurn) {
-      playersTurn();
+      playersTurn(playersPiece, boardValues);
     } else {
-      computersTurn();
+      computersTurn(computersPiece, boardValues);
     }
   }
 }
-
-let isPlayersTurn;
-let playersPiece;
-let computersPiece;
 
 getPlayersPiece();
 gameLoop(playersPiece);
