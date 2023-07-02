@@ -74,7 +74,7 @@ const valueConversion = {
   Jack: 10,
   Queen: 10,
   King: 10,
-  Aces: [1, 11],
+  Ace: [1, 11],
 };
 let remainingCards;
 let isPlayersTurn;
@@ -89,7 +89,11 @@ function initializeGame() {
     deck["Cloves"]
   );
   playersCards = {};
+  hit(true);
+  hit(true);
   dealersCards = {};
+  hit(false);
+  hit(false);
   return;
 }
 
@@ -137,7 +141,7 @@ function hit(isPlayersTurn) {
   }
 }
 
-function bust(cards) {
+function checkIfBust(cards) {
   let totalValue = calculateCardsValue(cards);
   cards["Value"] = totalValue;
 
@@ -150,4 +154,50 @@ function bust(cards) {
 
 function calculateCardsValue(cards) {
   let totalValue = 0;
+  Object.keys(cards).forEach((card) => {
+    if (card === "Ace") {
+      if (totalValue + 11 <= 21) {
+        cards[card] = valueConversion[card][1];
+        totalValue += valueConversion[card];
+      } else {
+        cards[card] = valueConversion[card][0];
+        totalValue += valueConversion[card];
+      }
+    } else {
+      cards[card] = valueConversion[card];
+      totalValue += valueConversion[card];
+    }
+  });
+
+  return totalValue;
 }
+
+function gameLoop() {
+  initializeGame();
+  isPlayersTurn = true;
+
+  while (true) {
+    if (isPlayersTurn) {
+      console.log(`Dealer: ${dealersCards}\nPlayer: ${playersCards}`);
+      let willHit = playersTurn();
+      if (willHit) {
+        hit(isPlayersTurn);
+      }
+      if (checkIfBust(playersCards)) {
+        return console.log("Dealer Won");
+      }
+      isPlayersTurn = false;
+    } else {
+      let willHit = dealersTurn();
+      if (willHit) {
+        hit(isPlayersTurn);
+      }
+      if (checkIfBust(dealersCards)) {
+        return console.log("Player Won");
+      }
+      isPlayersTurn = true;
+    }
+  }
+}
+
+gameLoop();
