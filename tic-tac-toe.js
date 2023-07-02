@@ -30,7 +30,6 @@ function initializeBoard() {
 }
 
 function getPlayersPiece() {
-  //Validates the user's input
   while (true) {
     prompt("Choose your piece: X or O");
     playersPiece = readline.question().toUpperCase();
@@ -44,7 +43,7 @@ function getPlayersPiece() {
     console.log("Please enter a valid piece.");
   }
 
-  return playersPiece, computersPiece;
+  return;
 }
 
 function playersTurn(piece) {
@@ -58,11 +57,8 @@ function playersTurn(piece) {
     console.log("Please enter a valid square.");
   }
 
-  return;
-}
-
-function makeMove(square, piece, boardValues) {
-  boardValues[square] = `${piece}`;
+  displayBoard(boardValues);
+  isPlayersTurn = false;
   return;
 }
 
@@ -75,9 +71,84 @@ function computersTurn(piece, boardValues) {
     }
   }
 
+  displayBoard(boardValues);
+  isPlayersTurn = true;
   return;
+}
+
+function makeMove(square, piece, boardValues) {
+  boardValues[square] = `${piece}`;
+  return;
+}
+
+function checkWinner(playersPiece, computersPiece, boardValues) {
+  let didPlayerWin = winConditions(playersPiece, boardValues);
+  let didComputerWin = winConditions(computersPiece, boardValues);
+
+  if (didPlayerWin) {
+    return "Player Won";
+  } else if (didComputerWin) {
+    return "Computer Won";
+  } else {
+    return false;
+  }
+}
+
+function winConditions(piece, boardValues) {
+  const conditionals = [
+    [boardValues[0], boardValues[1], boardValues[2]],
+    [boardValues[3], boardValues[4], boardValues[5]],
+    [boardValues[6], boardValues[7], boardValues[8]],
+    [boardValues[0], boardValues[3], boardValues[6]],
+    [boardValues[1], boardValues[4], boardValues[7]],
+    [boardValues[2], boardValues[5], boardValues[8]],
+    [boardValues[0], boardValues[4], boardValues[8]],
+    [boardValues[2], boardValues[4], boardValues[6]],
+  ];
+
+  for (let conditional of conditionals) {
+    if (
+      conditional[0] === piece &&
+      conditional[1] === piece &&
+      conditional[2] === piece
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function gameLoop(playersPiece) {
+  initializeBoard();
+  displayBoard();
+
+  if (playersPiece === "O") {
+    isPlayersTurn = true;
+  } else {
+    isPlayersTurn = false;
+  }
+
+  while (true) {
+    if (checkWinner(playersPiece, computersPiece, boardValues) !== false) {
+      return console.log(
+        checkWinner(playersPiece, computersPiece, boardValues)
+      );
+    } else if (!boardValues.includes(" ")) {
+      return console.log("It's a Tie");
+    }
+
+    if (isPlayersTurn) {
+      playersTurn();
+    } else {
+      computersTurn();
+    }
+  }
 }
 
 let isPlayersTurn;
 let playersPiece;
 let computersPiece;
+
+getPlayersPiece();
+gameLoop(playersPiece);
