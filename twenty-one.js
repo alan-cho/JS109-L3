@@ -88,10 +88,10 @@ function initializeGame() {
     deck["Diamonds"],
     deck["Cloves"]
   );
-  playersCards = {};
+  playersCards = { Value: 0 };
   hit(true);
   hit(true);
-  dealersCards = {};
+  dealersCards = { Value: 0 };
   hit(false);
   hit(false);
   return;
@@ -99,11 +99,11 @@ function initializeGame() {
 
 function playersTurn() {
   let willHit;
-  let move = readline
-    .question("Would You Like to Hit?\nYes or No: ")
-    .toUpperCase()
-    .trim();
   while (true) {
+    let move = readline
+      .question("Would You Like to Hit?\nYes or No: ")
+      .toUpperCase()
+      .trim();
     if (move === "YES" || move === "Y") {
       willHit = true;
       break;
@@ -119,7 +119,7 @@ function playersTurn() {
 
 function dealersTurn(dealersCards) {
   let willHit;
-  if (dealersCards < 17) {
+  if (dealersCards["Value"] < 17) {
     willHit = true;
   } else {
     willHit = false;
@@ -129,22 +129,23 @@ function dealersTurn(dealersCards) {
 }
 
 function hit(isPlayersTurn) {
-  let randomIndex = Math.floor(Math.random * remainingCards.length);
+  let randomIndex = Math.floor(Math.random() * remainingCards.length);
   let card = remainingCards[randomIndex];
   remainingCards.splice(randomIndex, 1);
   if (isPlayersTurn) {
     playersCards[card] = null;
+    calculateCardsValue(playersCards);
     return playersCards;
   } else {
     dealersCards[card] = null;
+    calculateCardsValue(dealersCards);
     return dealersCards;
   }
 }
 
 function checkIfBust(cards) {
-  let totalValue = calculateCardsValue(cards);
-  cards["Value"] = totalValue;
-
+  //let totalValue = calculateCardsValue(cards);
+  //cards["Value"] = totalValue;
   if (cards["Value"] > 21) {
     return true;
   } else {
@@ -152,16 +153,26 @@ function checkIfBust(cards) {
   }
 }
 
+function checkPerfectValue(cards) {
+  return cards["Value"] === 21;
+}
+
+function compareValues(playersCards, dealersCards) {
+  return playersCards["Value"] > dealersCards["Value"];
+}
+
 function calculateCardsValue(cards) {
   let totalValue = 0;
   Object.keys(cards).forEach((card) => {
-    if (card === "Ace") {
+    if (card === "Value") {
+      return;
+    } else if (card === "Ace") {
       if (totalValue + 11 <= 21) {
         cards[card] = valueConversion[card][1];
-        totalValue += valueConversion[card];
+        totalValue += valueConversion[card][1];
       } else {
         cards[card] = valueConversion[card][0];
-        totalValue += valueConversion[card];
+        totalValue += valueConversion[card][0];
       }
     } else {
       cards[card] = valueConversion[card];
@@ -169,6 +180,7 @@ function calculateCardsValue(cards) {
     }
   });
 
+  cards["Value"] = totalValue;
   return totalValue;
 }
 
@@ -178,23 +190,51 @@ function gameLoop() {
 
   while (true) {
     if (isPlayersTurn) {
-      console.log(`Dealer: ${dealersCards}\nPlayer: ${playersCards}`);
+      console.log("Dealer: ", dealersCards, "Player: ", playersCards);
       let willHit = playersTurn();
+
       if (willHit) {
         hit(isPlayersTurn);
       }
-      if (checkIfBust(playersCards)) {
-        return console.log("Dealer Won");
-      }
-      isPlayersTurn = false;
-    } else {
-      let willHit = dealersTurn();
-      if (willHit) {
-        hit(isPlayersTurn);
-      }
-      if (checkIfBust(dealersCards)) {
+
+      if (checkPerfectValue(playersCards)) {
+        console.log("Dealer: ", dealersCards, "Player: ", playersCards);
         return console.log("Player Won");
       }
+
+      if (!willHit) {
+        if (compareValues(playersCards, dealersCards)) {
+          console.log("Dealer: ", dealersCards, "Player: ", playersCards);
+          return console.log("Player Won");
+        } else {
+          console.log("Dealer: ", dealersCards, "Player: ", playersCards);
+          return console.log("Dealer Won");
+        }
+      }
+
+      if (checkIfBust(playersCards)) {
+        console.log("Dealer: ", dealersCards, "Player: ", playersCards);
+        return console.log("Dealer Won");
+      }
+
+      isPlayersTurn = false;
+    } else {
+      let willHit = dealersTurn(dealersCards);
+
+      if (willHit) {
+        hit(isPlayersTurn);
+      }
+
+      if (checkPerfectValue(dealersCards)) {
+        console.log("Dealer: ", dealersCards, "Player: ", playersCards);
+        return console.log("Dealer Won");
+      }
+
+      if (checkIfBust(dealersCards)) {
+        console.log("Dealer: ", dealersCards, "Player: ", playersCards);
+        return console.log("Player Won");
+      }
+
       isPlayersTurn = true;
     }
   }
