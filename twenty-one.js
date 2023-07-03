@@ -144,8 +144,6 @@ function hit(isPlayersTurn) {
 }
 
 function checkIfBust(cards) {
-  //let totalValue = calculateCardsValue(cards);
-  //cards["Value"] = totalValue;
   if (cards["Value"] > 21) {
     return true;
   } else {
